@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--  MAIN COLORS  -->
+    <color name="black">#000000</color>
+    <color name="black_10">#1a000000</color>
+
+    <color name="lisbon_brown">#342e1b</color>
+
+    <color name="monarch">#990d35</color>
+    <color name="brick_red">#d52941</color>
+
+    <color name="salmon">#fd8f60</color>
+    <color name="salomie">#ffe695</color>
+
+    <color name="cloud">#cecbc6</color>
+
+    <color name="early_dawn">#fdf9dd</color>
+    <color name="white">#ffffff</color>
+
+    <color name="debug">#ff00ff</color>
+
+    <!--  EDITOR COLORS  -->
+</resources>

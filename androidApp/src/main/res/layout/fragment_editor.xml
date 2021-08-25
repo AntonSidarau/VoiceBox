@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.jovvi.voicebox.android.feature.editor.ui.widget.EditorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/view_editor"
+    android:layout_height="match_parent"
+    />

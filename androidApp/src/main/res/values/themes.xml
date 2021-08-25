@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Base.Theme.VoiceBox" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- base colors -->
+        <item name="colorPrimary">@color/lisbon_brown</item>
+        <item name="colorPrimaryVariant">@color/black</item>
+        <item name="colorSecondary">@color/salomie</item>
+        <item name="colorSecondaryVariant">@color/salmon</item>
+        <item name="colorError">@color/brick_red</item>
+        <item name="android:colorBackground">@color/white</item>
+        <item name="colorSurface">@color/early_dawn</item>
+
+        <!-- "on" colors -->
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorOnSecondary">@color/lisbon_brown</item>
+        <item name="colorOnSurface">@color/lisbon_brown</item>
+        <item name="colorOnBackground">@color/black</item>
+        <item name="colorOnError">@color/white</item>
+
+        <!-- legacy appcompat colors-->
+        <item name="colorPrimaryDark">@color/debug</item>
+        <item name="colorControlActivated">@color/black_10</item>
+        <item name="colorControlNormal">?attr/colorOnSurface</item>
+        <item name="android:textColorPrimary">?attr/colorOnSurface</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurface</item>
+
+        <!-- platform colors-->
+        <item name="android:windowBackground">?android:colorBackground</item>
+        <item name="android:statusBarColor">@color/black_10</item>
+        <item name="android:navigationBarColor">@color/black_10</item>
+
+        <!-- shapes -->
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.VoiceBox.SmallComponent
+        </item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.VoiceBox.MediumComponent
+        </item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.VoiceBox.LargeComponent
+        </item>
+
+        <!-- typography -->
+        <item name="textAppearanceHeadline1">@style/TextAppearance.VoiceBox.Headline1</item>
+        <item name="textAppearanceHeadline2">@style/TextAppearance.VoiceBox.Headline2</item>
+        <item name="textAppearanceHeadline3">@style/TextAppearance.VoiceBox.Headline3</item>
+        <item name="textAppearanceHeadline4">@style/TextAppearance.VoiceBox.Headline4</item>
+        <item name="textAppearanceHeadline5">@style/TextAppearance.VoiceBox.Headline5</item>
+        <item name="textAppearanceHeadline6">@style/TextAppearance.VoiceBox.Headline6</item>
+        <item name="textAppearanceSubtitle1">@style/TextAppearance.VoiceBox.Subtitle1</item>
+        <item name="textAppearanceSubtitle2">@style/TextAppearance.VoiceBox.Subtitle2</item>
+        <item name="textAppearanceBody1">@style/TextAppearance.VoiceBox.Body1</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.VoiceBox.Body2</item>
+        <item name="textAppearanceButton">@style/TextAppearance.VoiceBox.Button</item>
+        <item name="textAppearanceCaption">@style/TextAppearance.VoiceBox.Caption</item>
+        <item name="textAppearanceOverline">@style/TextAppearance.VoiceBox.Overline</item>
+
+        <!-- default styles -->
+
+        <!-- dialog styles -->
+
+        <!-- custom view styles -->
+    </style>
+
+    <style name="Theme.VoiceBox" parent="Base.Theme.VoiceBox" />
+</resources>

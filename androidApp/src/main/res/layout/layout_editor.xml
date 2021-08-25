@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
+
+    <View
+        android:id="@+id/view_title"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <View
+        android:id="@+id/view_temp_controls"
+        android:layout_width="match_parent"
+        android:layout_height="90dp"
+        android:background="@color/brick_red"
+        app:layout_constraintBottom_toTopOf="@+id/view_palette"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <com.jovvi.voicebox.android.feature.editor.ui.widget.field.EditorFieldView
+        android:id="@+id/view_field"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/lisbon_brown"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@+id/view_temp_controls"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view_title"
+        />
+
+    <com.jovvi.voicebox.android.feature.editor.ui.widget.palette.EditorPaletteView
+        android:id="@+id/view_palette"
+        android:layout_width="match_parent"
+        android:layout_height="110dp"
+        android:background="@color/early_dawn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+</merge>
