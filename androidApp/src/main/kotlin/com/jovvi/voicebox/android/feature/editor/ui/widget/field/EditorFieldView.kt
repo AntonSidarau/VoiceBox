@@ -37,8 +37,9 @@ class EditorFieldView @JvmOverloads constructor(
         sizesCalculator = component.sizesCalculator
     }
 
-    private val cellBackgroundColor = context.getThemeColor(R.attr.colorSurface)
+    private val cellBackgroundColor = context.getThemeColor(R.attr.colorSecondary)
     private val defaultOnCellBackgroundColor = context.getThemeColor(R.attr.colorOnSurface)
+    private val fieldBackgroundColor = context.getThemeColor(android.R.attr.colorBackground)
 
     private val dotRadius = context.dpToPx(DOT_RADIUS_DP)
 
@@ -52,9 +53,15 @@ class EditorFieldView @JvmOverloads constructor(
         textSize = context.spToPx(TEXT_SIZE_SP)
         typeface = context.getFont(R.font.rubik_medium)
     }
+    private val blendedCellPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        pathEffect = CornerPathEffect(sizesCalculator.cellCornerRadius)
+        strokeCap = Paint.Cap.ROUND
+    }
 
     private val columnTemplatePath: Path = Path()
     private val columnPath: Path = Path()
+    private val blendedColumnCellPathTemplate: Path = Path()
+    private val blendedColumnCellPath: Path = Path()
     private val columnNumberRect: RectF = RectF()
 
     private val gestureDetector: GestureDetectorCompat = GestureDetectorCompat(
@@ -65,6 +72,7 @@ class EditorFieldView @JvmOverloads constructor(
             requestInvalidateOnAnimation = { postInvalidateOnAnimation() }
         )
     )
+    private lateinit var shadersStorage: CellShadersStorage
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -75,8 +83,10 @@ class EditorFieldView @JvmOverloads constructor(
         val cellWidth = sizesCalculator.cellWidth
         val cellMargin = sizesCalculator.cellMargin
 
+        initBlendedColumnCellTemplatePath(cellHeight, cellWidth)
         initColumnTemplatePath(cellHeight, cellWidth, cellMargin)
         initColumnNumberRect(cellHeight, cellWidth, cellMargin)
+        shadersStorage = CellShadersStorage(cellBackgroundColor, fieldBackgroundColor, cellWidth, cellHeight)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -95,8 +105,18 @@ class EditorFieldView @JvmOverloads constructor(
     private fun drawColumns(canvas: Canvas) {
         val columns = stateController.columns
         for (column in columns) {
+            blendedColumnCellPathTemplate.offset(column.position, 0F, blendedColumnCellPath)
+            blendedCellPaint.shader = shadersStorage.getTopCellShader(column.topBlendMode)
+            canvas.drawPath(blendedColumnCellPath, blendedCellPaint)
+
             columnTemplatePath.offset(column.position, 0F, columnPath)
             canvas.drawPath(columnPath, cellPaint)
+
+            blendedCellPaint.shader = shadersStorage.getBottomCellShader(column.bottomBlendMode)
+            canvas.save()
+            canvas.translate(0F, stateController.bottomNotContentCellPosition)
+            canvas.drawPath(blendedColumnCellPath, blendedCellPaint)
+            canvas.restore()
 
             val offsetTop = columnNumberRect.top
             val offsetBottom = stateController.fieldHeight - columnNumberRect.bottom
@@ -124,7 +144,6 @@ class EditorFieldView @JvmOverloads constructor(
     }
 
     private fun drawDot(canvas: Canvas, offsetTop: Float, column: FieldColumn) {
-        // val number = column.number
         val centerX = columnNumberRect.width() / 2F + column.position
         val centerY = columnNumberRect.height() / 2 + offsetTop
 
@@ -133,9 +152,22 @@ class EditorFieldView @JvmOverloads constructor(
         canvas.drawCircle(centerX, centerY, dotRadius, columnNumberPaint)
     }
 
+    private fun initBlendedColumnCellTemplatePath(cellHeight: Float, cellWidth: Float) {
+        blendedColumnCellPathTemplate.apply {
+            reset()
+            moveTo(0F, 0F)
+            rLineTo(cellWidth, 0F)
+            rLineTo(0F, cellHeight)
+            rLineTo(-cellWidth, 0F)
+            rLineTo(0F, -cellHeight)
+            close()
+        }
+    }
+
     private fun initColumnTemplatePath(cellHeight: Float, cellWidth: Float, cellMargin: Float) {
         columnTemplatePath.apply {
-            for (i in 0 until EditorSettings.FIELD_CELLS_COUNT) {
+            reset()
+            for (i in 1..EditorSettings.FIELD_CONTENT_CELLS_COUNT) {
                 val offset = i * cellHeight + i * cellMargin
                 moveTo(0F, offset)
                 rLineTo(cellWidth, 0F)

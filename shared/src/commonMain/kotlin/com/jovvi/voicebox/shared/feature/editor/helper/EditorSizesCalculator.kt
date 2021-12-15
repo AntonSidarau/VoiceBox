@@ -32,7 +32,13 @@ class EditorSizesCalculator(private val sizeProvider: EditorComponentsSizeProvid
             .toFloat()
 
     val paletteHeight: Float
-        get() = cellHeight * PALETTE_CELLS_COUNT + sizeProvider.paletteZoomHeight.roundToInt()
+        get() {
+            val cellsHeight = cellHeight * PALETTE_CELLS_COUNT
+            val zoomHeight = zoomedPaletteHeight
+            val margins = paletteMarginsHeight
+
+            return cellsHeight + zoomHeight + margins
+        }
 
     val titleBarHeight: Float
         get() = sizeProvider.titleBarHeight.roundToInt().toFloat()
@@ -43,6 +49,24 @@ class EditorSizesCalculator(private val sizeProvider: EditorComponentsSizeProvid
     val cellCornerRadius: Float
         get() = sizeProvider.cellCornerRadius.roundToInt().toFloat()
 
+    val paletteHorizontalMargin: Float
+        get() = sizeProvider.paletteHorizontalMargin.roundToInt().toFloat()
+
+    val paletteInnerVerticalMargin: Float
+        get() = sizeProvider.paletteInnerVerticalMargin.roundToInt().toFloat()
+
+    val paletteOuterVerticalMargin: Float
+        get() = sizeProvider.paletteOuterVerticalMargin.roundToInt().toFloat()
+
+    val zoomedPaletteHeight: Float
+        get() = sizeProvider.paletteZoomHeight.roundToInt().toFloat()
+
+    val zoomedPaletteBorderWidth: Float
+        get() = sizeProvider.zoomedPaletteBorderWidth.roundToInt().toFloat()
+
+    private val paletteMarginsHeight: Float
+        get() = 2 * (paletteInnerVerticalMargin + paletteOuterVerticalMargin)
+
     fun calculate(totalHeight: Int) {
         val reservedContentHeight = calculateFixedContentHeight()
         val cellMarginsHeight = CELL_MARGINS_COUNT * sizeProvider.cellMargin
@@ -52,11 +76,14 @@ class EditorSizesCalculator(private val sizeProvider: EditorComponentsSizeProvid
     }
 
     private fun calculateFixedContentHeight(): Float {
-        return sizeProvider.titleBarHeight + sizeProvider.controlsBarHeight + sizeProvider.paletteZoomHeight
+        return sizeProvider.titleBarHeight +
+                sizeProvider.controlsBarHeight +
+                sizeProvider.paletteZoomHeight +
+                paletteMarginsHeight
     }
 }
 
-// title - 100dp
-// control bar 90dp
-// palette - 56dp + 2 cell Height + 12bottom + 12bottom + 8top = 88dp + 2cellHeight
+// title - 96dp
+// control bar 86dp
+// palette - 56dp + 2 cell Height + 12bottom + 12bottom + 8top + 8bot = 96dp + 2cellHeight
 // field = 6cell + 3dp * 5 = 6cell + 15dp

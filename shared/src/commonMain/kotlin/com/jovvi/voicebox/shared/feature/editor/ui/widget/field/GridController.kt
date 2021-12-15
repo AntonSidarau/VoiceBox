@@ -2,12 +2,9 @@ package com.jovvi.voicebox.shared.feature.editor.ui.widget.field
 
 import com.jovvi.voicebox.shared.feature.editor.EditorSettings
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
+import com.jovvi.voicebox.shared.feature.editor.ui.widget.field.FieldColumn.BlendMode
 import kotlin.math.ceil
 import kotlin.random.Random
-
-private const val MIN_FACTOR = 0.3F
-private const val MAX_FACTOR = 0.9F
-private const val ROUND_VALUE = 100
 
 internal class GridController(
     fieldWidth: Int,
@@ -42,7 +39,7 @@ internal class GridController(
                 val position = configureColumnPosition(it)
                 val number = configureColumnNumber(it)
 
-                FieldColumn(position, number, generateBlendFactor(), generateBlendFactor())
+                FieldColumn(position, number, generateBlendMode(), generateBlendMode())
             }
         )
     }
@@ -108,9 +105,9 @@ internal class GridController(
         return columnIndex - 1
     }
 
-    private fun generateBlendFactor(): Float {
-        val generated = ceil(Random.nextFloat() * ROUND_VALUE) / ROUND_VALUE + MIN_FACTOR
-        return generated.coerceAtMost(MAX_FACTOR)
+    private fun generateBlendMode(): BlendMode {
+        val generated = Random.nextInt(BlendMode.MIN_BLEND_VALUE, BlendMode.MAX_BLEND_VALUE + 1)
+        return BlendMode.getFromBlendValue(generated)
     }
 
     private fun isExceedsFieldBoundaries(deltaX: Float): Boolean {

@@ -14,7 +14,11 @@ interface EditorComponentsSizeProvider {
 
     val paletteZoomHeight: Float
 
-    val paletteBottomMargin: Float
+    val paletteInnerVerticalMargin: Float
 
-    val paletteTopMargin: Float
+    val paletteOuterVerticalMargin: Float
+
+    val paletteHorizontalMargin: Float
+
+    val zoomedPaletteBorderWidth: Float
 }

@@ -24,6 +24,9 @@ class EditorLayout @JvmOverloads constructor(
 
     private val sizesCalculator: EditorSizesCalculator
 
+    val fieldView: EditorFieldView
+    val paletteView: EditorPaletteView
+
     init {
         val component: EditorComponent = Injector.getComponent(EditorComponent::class.java)
         sizesCalculator = component.sizesCalculator
@@ -31,14 +34,14 @@ class EditorLayout @JvmOverloads constructor(
         setWillNotDraw(false)
 
         val titleBar = View(context).apply { layoutParams = createDefaultChildLayoutParams() }
-        val field = EditorFieldView(context).apply { layoutParams = createDefaultChildLayoutParams() }
+        fieldView = EditorFieldView(context).apply { layoutParams = createDefaultChildLayoutParams() }
         val controlsBar = View(context).apply { layoutParams = createDefaultChildLayoutParams() }
-        val palette = EditorPaletteView(context).apply { layoutParams = createDefaultChildLayoutParams() }
+        paletteView = EditorPaletteView(context).apply { layoutParams = createDefaultChildLayoutParams() }
 
         addView(titleBar)
-        addView(field)
+        addView(fieldView)
         addView(controlsBar)
-        addView(palette)
+        addView(paletteView)
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
