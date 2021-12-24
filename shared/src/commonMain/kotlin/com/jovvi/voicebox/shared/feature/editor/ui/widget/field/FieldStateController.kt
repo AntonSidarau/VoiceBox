@@ -2,10 +2,13 @@ package com.jovvi.voicebox.shared.feature.editor.ui.widget.field
 
 import com.jovvi.voicebox.shared.feature.editor.EditorSettings
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
+import com.jovvi.voicebox.shared.feature.editor.helper.SharedStateHolder
 
 private const val PIXELS_PER_SECOND = 200
 
-class FieldStateController {
+class FieldStateController(
+    private val sharedStateHolder: SharedStateHolder
+) {
 
     private lateinit var gridController: GridController
 
@@ -26,7 +29,8 @@ class FieldStateController {
         val cellMargin = sizesCalculator.cellMargin
         bottomNotContentCellPosition = (cellHeight + cellMargin) * (EditorSettings.FIELD_CONTENT_CELLS_COUNT + 1)
 
-        gridController = GridController(fieldWidth, sizesCalculator)
+        sharedStateHolder.resetFieldState()
+        gridController = GridController(fieldWidth, sizesCalculator, sharedStateHolder)
         // TODO add another controllers, such as timelineController, draggedLoopController, etc
     }
 

@@ -72,7 +72,8 @@ class EditorFieldView @JvmOverloads constructor(
             requestInvalidateOnAnimation = { postInvalidateOnAnimation() }
         )
     )
-    private lateinit var shadersStorage: CellShadersStorage
+
+    private lateinit var cellShadersStorage: CellShadersStorage
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -86,7 +87,9 @@ class EditorFieldView @JvmOverloads constructor(
         initBlendedColumnCellTemplatePath(cellHeight, cellWidth)
         initColumnTemplatePath(cellHeight, cellWidth, cellMargin)
         initColumnNumberRect(cellHeight, cellWidth, cellMargin)
-        shadersStorage = CellShadersStorage(cellBackgroundColor, fieldBackgroundColor, cellWidth, cellHeight)
+        cellShadersStorage = CellShadersStorage(
+            cellBackgroundColor, fieldBackgroundColor, cellWidth, cellHeight
+        )
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -106,13 +109,13 @@ class EditorFieldView @JvmOverloads constructor(
         val columns = stateController.columns
         for (column in columns) {
             blendedColumnCellPathTemplate.offset(column.position, 0F, blendedColumnCellPath)
-            blendedCellPaint.shader = shadersStorage.getTopCellShader(column.topBlendMode)
+            blendedCellPaint.shader = cellShadersStorage.getTopCellShader(column.topBlendMode)
             canvas.drawPath(blendedColumnCellPath, blendedCellPaint)
 
             columnTemplatePath.offset(column.position, 0F, columnPath)
             canvas.drawPath(columnPath, cellPaint)
 
-            blendedCellPaint.shader = shadersStorage.getBottomCellShader(column.bottomBlendMode)
+            blendedCellPaint.shader = cellShadersStorage.getBottomCellShader(column.bottomBlendMode)
             canvas.save()
             canvas.translate(0F, stateController.bottomNotContentCellPosition)
             canvas.drawPath(blendedColumnCellPath, blendedCellPaint)

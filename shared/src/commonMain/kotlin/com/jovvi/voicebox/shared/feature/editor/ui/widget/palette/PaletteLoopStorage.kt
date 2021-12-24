@@ -56,6 +56,22 @@ class PaletteLoopStorage(
         addToStorage(key, paletteLoop)
     }
 
+    fun getLoopFrom(xPos: Float, yPos: Float): PaletteLoop? {
+        val topLoopsThreshold = topMargin + cellHeight + betweenMargin / 2
+        val initialIndex = if (yPos <= topLoopsThreshold) 0 else 1
+        val size = keyStore.size
+
+        for (i in initialIndex until size step 2) {
+            val key = keyStore[i]
+            val loop = store[key]
+            if (loop != null && xPos >= loop.virtualXStartPosition && xPos <= loop.virtualXEndPosition) {
+                return loop
+            }
+        }
+
+        return null
+    }
+
     private fun calculateLoopsWidthInRow(hasEvenLoopsCount: Boolean): Float {
         val size = keyStore.size
         val initialIndex = if (hasEvenLoopsCount) 0 else 1
@@ -66,10 +82,6 @@ class PaletteLoopStorage(
         }
 
         return totalWidth
-    }
-
-    private fun mapVirtualPositionToKey(positionX: Float): Int {
-        return 0 // TODO it will be used when user taps on loop
     }
 
     private fun addToStorage(key: Int, loop: PaletteLoop) {

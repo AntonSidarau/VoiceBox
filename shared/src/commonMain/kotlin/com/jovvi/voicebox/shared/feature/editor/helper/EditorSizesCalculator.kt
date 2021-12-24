@@ -31,6 +31,9 @@ class EditorSizesCalculator(private val sizeProvider: EditorComponentsSizeProvid
             .roundToInt()
             .toFloat()
 
+    val totalFieldWidth: Float
+        get() = EditorSettings.TIMELINE_LENGTH_COLUMNS * (cellWidth + cellMargin) + cellMargin
+
     val paletteHeight: Float
         get() {
             val cellsHeight = cellHeight * PALETTE_CELLS_COUNT

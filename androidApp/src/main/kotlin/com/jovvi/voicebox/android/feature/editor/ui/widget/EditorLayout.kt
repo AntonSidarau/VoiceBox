@@ -1,14 +1,19 @@
 package com.jovvi.voicebox.android.feature.editor.ui.widget
 
 import android.content.Context
+import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import com.jovvi.voicebox.android.common.di.Injector
 import com.jovvi.voicebox.android.feature.editor.di.EditorComponent
 import com.jovvi.voicebox.android.feature.editor.ui.widget.field.EditorFieldView
+import com.jovvi.voicebox.android.feature.editor.ui.widget.field.LoopDrawer
+import com.jovvi.voicebox.android.feature.editor.ui.widget.field.LoopShadersStorage
 import com.jovvi.voicebox.android.feature.editor.ui.widget.palette.EditorPaletteView
+import com.jovvi.voicebox.shared.business.editor.model.Loop
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
+import com.jovvi.voicebox.shared.feature.editor.ui.widget.editor.EditorStateController
 
 private const val CHILDREN_COUNT = 4
 private const val TITLE_BAR_INDEX = 0
@@ -23,6 +28,10 @@ class EditorLayout @JvmOverloads constructor(
 ) : ViewGroup(context, attrs, defStyleAttr) {
 
     private val sizesCalculator: EditorSizesCalculator
+    private val stateController: EditorStateController
+    private val loopShadersStorage: LoopShadersStorage
+
+    private lateinit var loopDrawer: LoopDrawer
 
     val fieldView: EditorFieldView
     val paletteView: EditorPaletteView
@@ -30,6 +39,8 @@ class EditorLayout @JvmOverloads constructor(
     init {
         val component: EditorComponent = Injector.getComponent(EditorComponent::class.java)
         sizesCalculator = component.sizesCalculator
+        stateController = component.editorStateController
+        loopShadersStorage = component.loopShadersStorage
 
         setWillNotDraw(false)
 
@@ -74,6 +85,44 @@ class EditorLayout @JvmOverloads constructor(
         setMeasuredDimension(containerWidth, containerHeight)
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+
+        stateController.initialize(w.toFloat(), h.toFloat())
+
+        initLoopShadersStorage()
+        initLoopDrawer()
+    }
+
+    override fun dispatchDraw(canvas: Canvas) {
+        super.dispatchDraw(canvas)
+        val loop = stateController.draggingLoop
+        if (loop != null) {
+            val xPos = stateController.draggingXPos
+            val yPos = stateController.draggingYPos
+            loopDrawer.draw(canvas, xPos, yPos, loop)
+        }
+    }
+
+    fun startDragging(xPos: Float, yPos: Float, loop: Loop) {
+        stateController.startDragging(xPos, yPos + paletteView.y, loop)
+        invalidate()
+    }
+
+    fun updateDraggingLoopPositions(deltaX: Float, deltaY: Float) {
+        stateController.updateDraggingPositions(deltaX, deltaY)
+        invalidate()
+    }
+
+    fun stopDragging() {
+        stateController.stopDragging()
+        invalidate()
+    }
+
+    fun clearListeners() {
+        paletteView.clearListeners()
+    }
+
     private fun createDefaultChildLayoutParams(): LayoutParams {
         return LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT)
     }
@@ -100,5 +149,15 @@ class EditorLayout @JvmOverloads constructor(
         val paletteHeight = sizesCalculator.paletteHeight.toInt()
         val heightMeasureSpec = MeasureSpec.makeMeasureSpec(paletteHeight, MeasureSpec.EXACTLY)
         palette.measure(containerWidthMeasureSpec, heightMeasureSpec)
+    }
+
+    private fun initLoopShadersStorage() {
+        val cellWidth = sizesCalculator.cellWidth
+        val cellHeight = sizesCalculator.cellHeight
+        loopShadersStorage.initialize(cellWidth, cellHeight)
+    }
+
+    private fun initLoopDrawer() {
+        loopDrawer = LoopDrawer(sizesCalculator, loopShadersStorage)
     }
 }

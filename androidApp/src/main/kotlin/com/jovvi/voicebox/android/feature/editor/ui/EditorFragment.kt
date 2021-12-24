@@ -18,8 +18,10 @@ class EditorFragment : BaseFragment(R.layout.fragment_editor), ComponentContaine
 
     override val componentClass: Class<*> get() = EditorComponent::class.java
 
+    private lateinit var editorLayout: EditorLayout
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val editorLayout: EditorLayout = view.findViewById(R.id.view_editor)
+        editorLayout = view.findViewById(R.id.view_editor)
 
         editorLayout.applyInsetter { type(statusBars = true, navigationBars = true) { padding() } }
 
@@ -28,9 +30,28 @@ class EditorFragment : BaseFragment(R.layout.fragment_editor), ComponentContaine
 
             val list = mutableListOf<Loop>()
             repeat(20) {
-                list.add(Loop("", LoopColorStorage.provide(it), Loop.Size.FOUR))
+                list.add(Loop("$it", LoopColorStorage.provide(it), Loop.Size.FOUR))
             }
             editorLayout.paletteView.prePopulate(list)
+        }
+
+        bindViewActions(editorLayout)
+    }
+
+    override fun onDestroyView() {
+        editorLayout.clearListeners()
+        super.onDestroyView()
+    }
+
+    private fun bindViewActions(editorLayout: EditorLayout) {
+        with(editorLayout) {
+            paletteView.setOnStartDraggingLoopListener { xPos, yPos, loop ->
+                editorLayout.startDragging(xPos, yPos, loop)
+            }
+            paletteView.setOnEndDraggingLoopListener { editorLayout.stopDragging() }
+            paletteView.setOnDraggingLoopListener { distanceX, distanceY ->
+                editorLayout.updateDraggingLoopPositions(distanceX, distanceY)
+            }
         }
     }
 }

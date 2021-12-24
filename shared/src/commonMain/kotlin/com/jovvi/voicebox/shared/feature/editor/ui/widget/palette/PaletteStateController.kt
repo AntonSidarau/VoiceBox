@@ -19,6 +19,10 @@ class PaletteStateController(
 
     private lateinit var state: PaletteState
 
+    private var onStartDraggingLoopListener: ((xPos: Float, yPos: Float, loop: Loop) -> Unit)? = null
+    private var onEndDraggingLoopListener: (() -> Unit)? = null
+    private var onDraggingLoopListener: ((distanceX: Float, distanceY: Float) -> Unit)? = null
+
     val loops: Collection<PaletteLoop> get() = state.loopStorage.availableLoops
     val paletteScaleX: Float get() = state.loopStorage.scaleDownFactor
     val virtualStartPos: Float get() = state.virtualStartPosition
@@ -73,6 +77,18 @@ class PaletteStateController(
         )
     }
 
+    fun setOnStartDraggingLoopListener(block: ((xPos: Float, yPos: Float, loop: Loop) -> Unit)?) {
+        onStartDraggingLoopListener = block
+    }
+
+    fun setOnEndDraggingLoopListener(block: (() -> Unit)?) {
+        onEndDraggingLoopListener = block
+    }
+
+    fun setOnEndDraggingLoopListener(block: ((distanceX: Float, distanceY: Float) -> Unit)?) {
+        onDraggingLoopListener = block
+    }
+
     fun updateOnScroll(distanceX: Float) {
         val newPosition = state.magnifierCenterPosition - distanceX
         state.magnifierCenterPosition = correctMagnifierPosition(newPosition)
@@ -82,6 +98,26 @@ class PaletteStateController(
     fun moveTo(xPos: Float) {
         state.magnifierCenterPosition = correctMagnifierPosition(xPos)
         state.virtualStartPosition = calculateVirtualPalettePositionFrom(state.magnifierCenterPosition)
+    }
+
+    fun handleLoopTouch(xPos: Float, yPos: Float) {
+        // TODO implement preview icon by checking loop sector
+
+        val tapXPos = state.virtualStartPosition + xPos
+        val loop = state.loopStorage.getLoopFrom(tapXPos, yPos)
+        if (loop != null) {
+            val loopXPos = loop.virtualXStartPosition - state.virtualStartPosition
+            val loopYPos = loop.yTopPosition
+            onStartDraggingLoopListener?.invoke(loopXPos, loopYPos, loop.model)
+        }
+    }
+
+    fun handleLoopDragging(deltaX: Float, deltaY: Float) {
+        onDraggingLoopListener?.invoke(deltaX, deltaY)
+    }
+
+    fun handleLoopTouchEnded() {
+        onEndDraggingLoopListener?.invoke()
     }
 
     fun prePopulate(loops: List<Loop>) {

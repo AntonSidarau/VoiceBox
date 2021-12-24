@@ -15,7 +15,6 @@ import com.jovvi.voicebox.android.common.di.Injector
 import com.jovvi.voicebox.android.feature.editor.di.EditorComponent
 import com.jovvi.voicebox.android.feature.editor.ui.widget.field.LoopDrawer
 import com.jovvi.voicebox.android.feature.editor.ui.widget.field.LoopShadersStorage
-import com.jovvi.voicebox.shared.business.editor.helper.LoopColorStorage
 import com.jovvi.voicebox.shared.business.editor.model.Loop
 import com.jovvi.voicebox.shared.common.ui.ext.dpToPx
 import com.jovvi.voicebox.shared.common.ui.ext.getThemeColor
@@ -32,21 +31,27 @@ class EditorPaletteView @JvmOverloads constructor(
 
     private val stateController: PaletteStateController
     private val sizesCalculator: EditorSizesCalculator
+    private val loopShadersStorage: LoopShadersStorage
 
     init {
         val component: EditorComponent = Injector.getComponent(EditorComponent::class.java)
         stateController = component.paletteStateController
         sizesCalculator = component.sizesCalculator
+        loopShadersStorage = component.loopShadersStorage
     }
 
-    private val gestureDetector: GestureDetectorCompat = GestureDetectorCompat(
-        context, PaletteGestureDetector(stateController, requestInvalidate = { invalidate() })
+    private val paletteGesturesListener = PaletteGestureDetector(
+        stateController, requestInvalidate = { invalidate() }
     )
+    private val gestureDetector: GestureDetectorCompat = GestureDetectorCompat(
+        context, paletteGesturesListener
+    )
+
     private val magnifierRect: RectF = RectF()
     private val magnifierPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
         strokeWidth = context.dpToPx(ZOOM_BORDER_WIDTH_DP)
-        color = context.getColor(R.color.debug)
+        color = context.getThemeColor(R.attr.colorSecondaryVariant)
     }
     private val paletteBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -65,18 +70,21 @@ class EditorPaletteView @JvmOverloads constructor(
 
         stateController.initialize(w.toFloat())
 
-        val cellWidth = sizesCalculator.cellWidth
-        val cellHeight = sizesCalculator.cellHeight
         val zoomPaletteHeight = sizesCalculator.zoomedPaletteHeight
         zoomBorderRadius = sizesCalculator.cellCornerRadius
 
-        initLoopsShaderDrawer(cellWidth, cellHeight)
+        initLoopsShaderDrawer()
         initZoomedPaletteBitmap(w, zoomPaletteHeight.toInt())
         initMagnifierRect(zoomPaletteHeight)
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+        if (event?.action == MotionEvent.ACTION_UP || event?.action == MotionEvent.ACTION_CANCEL) {
+            paletteGesturesListener.cancelLoopDragging()
+            stateController.handleLoopTouchEnded()
+        }
+
         return if (gestureDetector.onTouchEvent(event)) {
             true
         } else {
@@ -94,6 +102,24 @@ class EditorPaletteView @JvmOverloads constructor(
         stateController.prePopulate(loops)
         drawZoomedPaletteContent()
         invalidate()
+    }
+
+    fun setOnStartDraggingLoopListener(block: ((xPos: Float, yPos: Float, loop: Loop) -> Unit)?) {
+        stateController.setOnStartDraggingLoopListener(block)
+    }
+
+    fun setOnEndDraggingLoopListener(block: (() -> Unit)?) {
+        stateController.setOnEndDraggingLoopListener(block)
+    }
+
+    fun setOnDraggingLoopListener(block: ((distanceX: Float, distanceY: Float) -> Unit)?) {
+        stateController.setOnEndDraggingLoopListener(block)
+    }
+
+    fun clearListeners() {
+        setOnStartDraggingLoopListener(null)
+        setOnEndDraggingLoopListener(null)
+        setOnDraggingLoopListener(null)
     }
 
     private fun drawPaletteLoops(canvas: Canvas) {
@@ -161,8 +187,7 @@ class EditorPaletteView @JvmOverloads constructor(
         }
     }
 
-    private fun initLoopsShaderDrawer(cellWidth: Float, cellHeight: Float) {
-        val loopShadersStorage = LoopShadersStorage(cellWidth, cellHeight, LoopColorStorage)
+    private fun initLoopsShaderDrawer() {
         loopDrawer = LoopDrawer(sizesCalculator, loopShadersStorage)
     }
 

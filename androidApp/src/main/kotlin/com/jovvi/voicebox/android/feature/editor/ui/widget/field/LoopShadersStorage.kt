@@ -7,18 +7,15 @@ import com.jovvi.voicebox.shared.business.editor.model.Loop
 import com.jovvi.voicebox.shared.feature.editor.EditorHelpers
 
 class LoopShadersStorage(
-    private val cellWidth: Float,
-    private val cellHeight: Float,
-    loopColorStorage: LoopColorStorage
+    private val loopColorStorage: LoopColorStorage
 ) {
 
-    private val loopShadersMap: Map<Loop.Color, LinearGradient>
+    private val loopShadersMap: MutableMap<Loop.Color, LinearGradient> = mutableMapOf()
 
-    init {
-        loopShadersMap = mutableMapOf<Loop.Color, LinearGradient>().apply {
-            loopColorStorage.provideColors().forEach {
-                put(it, createLoopLinearGradient(it))
-            }
+    fun initialize(cellWidth: Float, cellHeight: Float) {
+        loopShadersMap.clear()
+        loopColorStorage.provideColors().forEach {
+            loopShadersMap[it] = createLoopLinearGradient(it, cellWidth, cellHeight)
         }
     }
 
@@ -26,7 +23,11 @@ class LoopShadersStorage(
         return loopShadersMap.getValue(color)
     }
 
-    private fun createLoopLinearGradient(color: Loop.Color): LinearGradient {
+    private fun createLoopLinearGradient(
+        color: Loop.Color,
+        cellWidth: Float,
+        cellHeight: Float
+    ): LinearGradient {
         val startColor = color.startColor.argb
         val endColor = color.endColor.argb
 

@@ -1,14 +1,15 @@
 package com.jovvi.voicebox.shared.feature.editor.ui.widget.field
 
-import com.jovvi.voicebox.shared.feature.editor.EditorSettings
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
+import com.jovvi.voicebox.shared.feature.editor.helper.SharedStateHolder
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.field.FieldColumn.BlendMode
 import kotlin.math.ceil
 import kotlin.random.Random
 
 internal class GridController(
     fieldWidth: Int,
-    sizesCalculator: EditorSizesCalculator
+    sizesCalculator: EditorSizesCalculator,
+    private val sharedStateHolder: SharedStateHolder
 ) {
 
     private val state: GridState
@@ -27,7 +28,7 @@ internal class GridController(
         cellMargin = sizesCalculator.cellMargin
         columnWidth = cellWidth + cellMargin
 
-        val maxLength = EditorSettings.TIMELINE_LENGTH_COLUMNS * columnWidth + cellMargin
+        val maxLength = sizesCalculator.totalFieldWidth
         virtualStartPosBoundary = maxLength - fieldWidth
 
         val columnWidth = cellWidth + cellMargin
@@ -65,8 +66,7 @@ internal class GridController(
             else -> distanceX
         }
 
-        state.virtualStartXPosition += deltaX
-
+        updateVirtualStartXPosition(deltaX)
         updateColumnsOnScrollInternal(deltaX)
 
         return wasUpdatedNormally
@@ -108,6 +108,12 @@ internal class GridController(
     private fun generateBlendMode(): BlendMode {
         val generated = Random.nextInt(BlendMode.MIN_BLEND_VALUE, BlendMode.MAX_BLEND_VALUE + 1)
         return BlendMode.getFromBlendValue(generated)
+    }
+
+    private fun updateVirtualStartXPosition(deltaX: Float) {
+        val newPosition = state.virtualStartXPosition + deltaX
+        state.virtualStartXPosition = newPosition
+        sharedStateHolder.fieldVirtualStartPos = newPosition
     }
 
     private fun isExceedsFieldBoundaries(deltaX: Float): Boolean {
