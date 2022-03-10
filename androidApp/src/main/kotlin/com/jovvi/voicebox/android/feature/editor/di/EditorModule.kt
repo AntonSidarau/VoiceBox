@@ -47,7 +47,7 @@ interface EditorModule {
                 }
 
                 override val fieldStateController: FieldStateController
-                    get() = FieldStateController(editorSharedStateHolder)
+                    get() = FieldStateController(editorSharedStateHolder, AndroidSimpleLogger)
 
                 override val paletteStateController: PaletteStateController
                     get() = PaletteStateController(sizesCalculator, AndroidSimpleLogger)

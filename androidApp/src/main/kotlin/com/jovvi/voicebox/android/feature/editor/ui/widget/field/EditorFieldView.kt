@@ -10,6 +10,7 @@ import androidx.core.view.GestureDetectorCompat
 import com.jovvi.voicebox.android.R
 import com.jovvi.voicebox.android.common.di.Injector
 import com.jovvi.voicebox.android.feature.editor.di.EditorComponent
+import com.jovvi.voicebox.shared.business.editor.model.Loop
 import com.jovvi.voicebox.shared.common.ui.ext.dpToPx
 import com.jovvi.voicebox.shared.common.ui.ext.getFont
 import com.jovvi.voicebox.shared.common.ui.ext.getThemeColor
@@ -30,11 +31,13 @@ class EditorFieldView @JvmOverloads constructor(
 
     private val stateController: FieldStateController
     private val sizesCalculator: EditorSizesCalculator
+    private val loopShadersStorage: LoopShadersStorage
 
     init {
         val component: EditorComponent = Injector.getComponent(EditorComponent::class.java)
         stateController = component.fieldStateController
         sizesCalculator = component.sizesCalculator
+        loopShadersStorage = component.loopShadersStorage
     }
 
     private val cellBackgroundColor = context.getThemeColor(R.attr.colorSecondary)
@@ -74,6 +77,7 @@ class EditorFieldView @JvmOverloads constructor(
     )
 
     private lateinit var cellShadersStorage: CellShadersStorage
+    private lateinit var loopDrawer: LoopDrawer
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
@@ -90,6 +94,7 @@ class EditorFieldView @JvmOverloads constructor(
         cellShadersStorage = CellShadersStorage(
             cellBackgroundColor, fieldBackgroundColor, cellWidth, cellHeight
         )
+        initLoopDrawer()
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -103,6 +108,13 @@ class EditorFieldView @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         drawColumns(canvas)
+        drawLoops(canvas)
+    }
+
+    // TODO sometimes doesn't work. UPD when loop between cells
+    fun tryAddLoop(xPos: Float, yPos: Float, loop: Loop) {
+        stateController.addDraggedLoop(xPos, yPos, loop)
+        invalidate()
     }
 
     private fun drawColumns(canvas: Canvas) {
@@ -155,6 +167,23 @@ class EditorFieldView @JvmOverloads constructor(
         canvas.drawCircle(centerX, centerY, dotRadius, columnNumberPaint)
     }
 
+    private fun drawLoops(canvas: Canvas) {
+        val loops = stateController.loops
+        val startBoundary = stateController.virtualStartPos
+        val endBoundary = startBoundary + width
+
+        for (loop in loops) {
+            // TODO check if loop clicked
+            if (loop.virtualStartXPos <= endBoundary && loop.virtualEndXPos >= startBoundary) {
+                val xPos = loop.virtualStartXPos - startBoundary
+                val loopModel = loop.model
+                val loopWidth = stateController.getLoopWidth(loopModel.size)
+
+                loopDrawer.draw2(canvas, xPos, loop.yPos, loopModel, loopWidth)
+            }
+        }
+    }
+
     private fun initBlendedColumnCellTemplatePath(cellHeight: Float, cellWidth: Float) {
         blendedColumnCellPathTemplate.apply {
             reset()
@@ -186,5 +215,9 @@ class EditorFieldView @JvmOverloads constructor(
         columnNumberRect.set(
             cellMargin, cellHeight - cellWidth, cellWidth + cellMargin, cellHeight
         )
+    }
+
+    private fun initLoopDrawer() {
+        loopDrawer = LoopDrawer(sizesCalculator, loopShadersStorage)
     }
 }

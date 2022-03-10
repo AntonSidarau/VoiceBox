@@ -23,11 +23,11 @@ class FieldGestureDetector(
     override fun onDown(e: MotionEvent?): Boolean = true
 
     override fun onShowPress(e: MotionEvent?) {
-        // TODO start drag?
+        // TODO start drag
     }
 
     override fun onSingleTapUp(e: MotionEvent?): Boolean {
-        // TODO show action popup?
+        // TODO show action popup
 
         return true
     }

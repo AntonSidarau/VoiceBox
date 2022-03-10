@@ -1,5 +1,7 @@
 package com.jovvi.voicebox.shared.feature.editor.ui.widget.field
 
+import com.jovvi.voicebox.shared.business.editor.model.Loop
+
 class FieldState(
     val gridState: GridState
 )
@@ -7,6 +9,15 @@ class FieldState(
 class GridState(
     var virtualStartXPosition: Float,
     val columns: Array<FieldColumn>
+)
+
+data class FieldLoop(
+    val virtualStartXPos: Float,
+    val virtualEndXPos: Float,
+    val yPos: Float,
+    val model: Loop,
+    val columnNumber: Int,
+    val rowNumber: Int
 )
 
 data class FieldColumn(

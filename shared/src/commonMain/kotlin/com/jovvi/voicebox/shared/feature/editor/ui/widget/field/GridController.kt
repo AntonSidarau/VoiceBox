@@ -4,6 +4,7 @@ import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
 import com.jovvi.voicebox.shared.feature.editor.helper.SharedStateHolder
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.field.FieldColumn.BlendMode
 import kotlin.math.ceil
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 internal class GridController(
@@ -16,15 +17,18 @@ internal class GridController(
 
     // region shortcut values
     private var cellWidth: Float = 0F
+    private var cellHeight: Float = 0F
     private var cellMargin: Float = 0F
     private var columnWidth: Float = 0F
     private var virtualStartPosBoundary: Float = 0F
     // endregion
 
     val columns: Array<FieldColumn> get() = state.columns
+    val virtualStartPos: Float get() = state.virtualStartXPosition
 
     init {
         cellWidth = sizesCalculator.cellWidth
+        cellHeight = sizesCalculator.cellHeight
         cellMargin = sizesCalculator.cellMargin
         columnWidth = cellWidth + cellMargin
 
@@ -95,6 +99,33 @@ internal class GridController(
             }
             column.position = correctedX
         }
+    }
+
+    fun calculateColumnIndex(xPos: Float): Int {
+        val columns = state.columns
+        val columnsCount = columns.size
+        var index = -1
+        for (i in 0 until columnsCount) {
+            val j = if (i + 1 >= columnsCount) 0 else i + 1
+            val current = columns[i].position
+            val next = columns[j].position
+            if (xPos in current..next) {
+                index = i
+                break
+            }
+        }
+
+        return index
+    }
+
+    fun calculateRowIndexWithRounding(yPos: Float): Int {
+        val possibleRow = ((yPos - cellHeight) / (cellHeight + cellMargin)).roundToInt()
+        return if (possibleRow <= -1) -1 else possibleRow
+    }
+
+    fun calculateRowIndexPrecise(yPos: Float): Int {
+        val possibleRow = (yPos - cellHeight - cellMargin) / (cellHeight + cellMargin)
+        return if (possibleRow < 0F) -1 else possibleRow.toInt()
     }
 
     private fun configureColumnPosition(columnIndex: Int): Float {

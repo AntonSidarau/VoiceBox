@@ -80,6 +80,20 @@ class EditorStateController(
         state.draggingLoopYPos = -1F
     }
 
+    fun isDraggingLoopInBounds(
+        xLeft: Float,
+        yTop: Float,
+        xRight: Float,
+        yBottom: Float
+    ): Boolean {
+        if (draggingLoop == null) return false
+
+        val isInVerticalBounds = state.draggingLoopYPos in yTop..yBottom
+        val isInHorizontalBounds = state.draggingLoopXPos in xLeft..xRight
+
+        return isInHorizontalBounds && isInVerticalBounds
+    }
+
     private fun initDraggingCoordinates(x: Float, y: Float) {
         val offset = sizeCalculator.cellHeight * DRAG_OFFSET_FACTOR
         val xPos = x + offset

@@ -115,6 +115,16 @@ class EditorLayout @JvmOverloads constructor(
     }
 
     fun stopDragging() {
+        val isInField = stateController.isDraggingLoopInBounds(
+            0F, fieldView.top.toFloat(), width.toFloat(), fieldView.bottom.toFloat()
+        )
+        val draggingLoop = stateController.draggingLoop
+        if (draggingLoop != null && isInField) {
+            val xPos = stateController.draggingXPos
+            val yPos = stateController.draggingYPos - fieldView.top.toFloat()
+            fieldView.tryAddLoop(xPos, yPos, draggingLoop)
+        }
+
         stateController.stopDragging()
         invalidate()
     }
