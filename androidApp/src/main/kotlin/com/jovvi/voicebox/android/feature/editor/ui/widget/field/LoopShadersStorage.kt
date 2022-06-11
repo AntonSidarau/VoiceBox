@@ -4,18 +4,19 @@ import android.graphics.LinearGradient
 import android.graphics.Shader
 import com.jovvi.voicebox.shared.business.editor.helper.LoopColorStorage
 import com.jovvi.voicebox.shared.business.editor.model.Loop
-import com.jovvi.voicebox.shared.feature.editor.EditorHelpers
+import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
 
 class LoopShadersStorage(
-    private val loopColorStorage: LoopColorStorage
+    private val loopColorStorage: LoopColorStorage,
+    private val sizesCalculator: EditorSizesCalculator
 ) {
 
     private val loopShadersMap: MutableMap<Loop.Color, LinearGradient> = mutableMapOf()
 
-    fun initialize(cellWidth: Float, cellHeight: Float) {
+    fun initialize() {
         loopShadersMap.clear()
         loopColorStorage.provideColors().forEach {
-            loopShadersMap[it] = createLoopLinearGradient(it, cellWidth, cellHeight)
+            loopShadersMap[it] = createLoopLinearGradient(it)
         }
     }
 
@@ -23,18 +24,14 @@ class LoopShadersStorage(
         return loopShadersMap.getValue(color)
     }
 
-    private fun createLoopLinearGradient(
-        color: Loop.Color,
-        cellWidth: Float,
-        cellHeight: Float
-    ): LinearGradient {
+    private fun createLoopLinearGradient(color: Loop.Color): LinearGradient {
         val startColor = color.startColor.argb
         val endColor = color.endColor.argb
 
         return LinearGradient(
             0F,
             0F,
-            EditorHelpers.getLoopWidth(cellWidth, cellHeight, Loop.Size.FOUR),
+            sizesCalculator.getLoopWidth(Loop.Size.FOUR),
             0F,
             startColor,
             endColor,

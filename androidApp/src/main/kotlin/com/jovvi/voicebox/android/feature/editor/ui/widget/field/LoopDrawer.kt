@@ -4,39 +4,29 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
 import com.jovvi.voicebox.shared.business.editor.model.Loop
-import com.jovvi.voicebox.shared.feature.editor.EditorHelpers
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
 
 class LoopDrawer(
-    sizesCalculator: EditorSizesCalculator,
+    private val sizesCalculator: EditorSizesCalculator,
     private val shadersStorage: LoopShadersStorage
 ) {
 
+    init {
+        sizesCalculator.ensureInitialized()
+    }
+
     private val loopHeight = sizesCalculator.cellHeight
-    private val cellWidth = sizesCalculator.cellWidth
-    private val cellMargin = sizesCalculator.cellMargin
 
     private val rect: RectF = RectF()
     private val gradientPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val rawPaint: Paint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val cornerRadius = sizesCalculator.cellCornerRadius
 
-    // TODO remove, prefer version below
     fun draw(canvas: Canvas, xPos: Float, yPos: Float, loop: Loop) {
         canvas.save()
         canvas.translate(xPos, yPos)
 
-        rect.set(0F, 0F, EditorHelpers.getLoopWidth(cellWidth, cellMargin, loop.size), loopHeight)
-        gradientPaint.shader = shadersStorage.getLoopShader(loop.color)
-        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, gradientPaint)
-
-        canvas.restore()
-    }
-
-    fun draw2(canvas: Canvas, xPos: Float, yPos: Float, loop: Loop, loopWidth: Float) {
-        canvas.save()
-        canvas.translate(xPos, yPos)
-
+        val loopWidth = sizesCalculator.getLoopWidth(loop.size)
         rect.set(0F, 0F, loopWidth, loopHeight)
         gradientPaint.shader = shadersStorage.getLoopShader(loop.color)
         canvas.drawRoundRect(rect, cornerRadius, cornerRadius, gradientPaint)

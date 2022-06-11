@@ -36,12 +36,12 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                implementation("com.google.android.material:material:1.4.0")
-                implementation("androidx.appcompat:appcompat:1.3.1")
-                implementation("androidx.constraintlayout:constraintlayout:2.1.0")
-                implementation("androidx.core:core-ktx:1.6.0")
-                implementation("androidx.fragment:fragment:1.3.6")
-                implementation("androidx.lifecycle:lifecycle-common-java8:2.3.1")
+                implementation("com.google.android.material:material:1.6.1")
+                implementation("androidx.appcompat:appcompat:1.4.2")
+                implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+                implementation("androidx.core:core-ktx:1.8.0")
+                implementation("androidx.fragment:fragment:1.4.1")
+                implementation("androidx.lifecycle:lifecycle-common-java8:2.4.1")
                 implementation("dev.chrisbanes.insetter:insetter:0.6.0")
             }
         }
@@ -57,10 +57,10 @@ kotlin {
 }
 
 android {
-    compileSdk = 30
+    compileSdk = 31
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
         minSdk = 24
-        targetSdk = 30
+        targetSdk = 31
     }
 }

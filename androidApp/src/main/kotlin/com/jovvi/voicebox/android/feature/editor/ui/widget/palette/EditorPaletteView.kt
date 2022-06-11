@@ -80,7 +80,9 @@ class EditorPaletteView @JvmOverloads constructor(
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        if (event?.action == MotionEvent.ACTION_UP || event?.action == MotionEvent.ACTION_CANCEL) {
+        event ?: return super.onTouchEvent(event)
+
+        if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
             paletteGesturesListener.cancelLoopDragging()
             stateController.handleLoopTouchEnded()
         }

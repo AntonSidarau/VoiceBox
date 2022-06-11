@@ -1,16 +1,12 @@
 package com.jovvi.voicebox.shared.feature.editor.ui.widget.palette
 
 import com.jovvi.voicebox.shared.business.editor.model.Loop
-import com.jovvi.voicebox.shared.common.SimpleLogger
 import com.jovvi.voicebox.shared.feature.editor.EditorSettings.PALETTE_CELLS_COUNT
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
 
 private const val ZOOM_MARGINS_COUNT = 3
 
-class PaletteStateController(
-    private val sizesCalculator: EditorSizesCalculator,
-    private val simpleLogger: SimpleLogger // TODO remove
-) {
+class PaletteStateController(private val sizesCalculator: EditorSizesCalculator) {
 
     companion object {
 
@@ -48,6 +44,8 @@ class PaletteStateController(
         private set
 
     fun initialize(fieldWidth: Float) {
+        sizesCalculator.ensureInitialized()
+
         val innerPaletteHorizontalMargin = sizesCalculator.paletteHorizontalMargin
         val bottomMargin = sizesCalculator.paletteInnerVerticalMargin
         val topMargin = sizesCalculator.paletteOuterVerticalMargin

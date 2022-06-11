@@ -162,9 +162,7 @@ class EditorLayout @JvmOverloads constructor(
     }
 
     private fun initLoopShadersStorage() {
-        val cellWidth = sizesCalculator.cellWidth
-        val cellHeight = sizesCalculator.cellHeight
-        loopShadersStorage.initialize(cellWidth, cellHeight)
+        loopShadersStorage.initialize()
     }
 
     private fun initLoopDrawer() {

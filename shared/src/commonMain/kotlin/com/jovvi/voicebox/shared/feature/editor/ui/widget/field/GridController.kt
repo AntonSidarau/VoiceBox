@@ -13,6 +13,10 @@ internal class GridController(
     private val sharedStateHolder: SharedStateHolder
 ) {
 
+    init {
+        sizesCalculator.ensureInitialized()
+    }
+
     private val state: GridState
 
     // region shortcut values
@@ -110,7 +114,9 @@ internal class GridController(
             val current = columns[i].position
             val next = columns[j].position
             if (xPos in current..next) {
-                index = i
+                val currentSide = xPos - current
+                val nextSide = next - xPos
+                index = if (currentSide > nextSide) j else i
                 break
             }
         }

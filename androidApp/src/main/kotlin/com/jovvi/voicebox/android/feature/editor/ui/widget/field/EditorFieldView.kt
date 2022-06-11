@@ -82,7 +82,7 @@ class EditorFieldView @JvmOverloads constructor(
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
 
-        stateController.initialize(w, sizesCalculator)
+        stateController.initialize(w)
 
         val cellHeight = sizesCalculator.cellHeight
         val cellWidth = sizesCalculator.cellWidth
@@ -99,6 +99,8 @@ class EditorFieldView @JvmOverloads constructor(
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+        event ?: return super.onTouchEvent(event)
+
         return if (gestureDetector.onTouchEvent(event)) {
             true
         } else {
@@ -111,7 +113,6 @@ class EditorFieldView @JvmOverloads constructor(
         drawLoops(canvas)
     }
 
-    // TODO sometimes doesn't work. UPD when loop between cells
     fun tryAddLoop(xPos: Float, yPos: Float, loop: Loop) {
         stateController.addDraggedLoop(xPos, yPos, loop)
         invalidate()
@@ -177,9 +178,8 @@ class EditorFieldView @JvmOverloads constructor(
             if (loop.virtualStartXPos <= endBoundary && loop.virtualEndXPos >= startBoundary) {
                 val xPos = loop.virtualStartXPos - startBoundary
                 val loopModel = loop.model
-                val loopWidth = stateController.getLoopWidth(loopModel.size)
 
-                loopDrawer.draw2(canvas, xPos, loop.yPos, loopModel, loopWidth)
+                loopDrawer.draw(canvas, xPos, loop.yPos, loopModel)
             }
         }
     }
@@ -213,7 +213,10 @@ class EditorFieldView @JvmOverloads constructor(
 
     private fun initColumnNumberRect(cellHeight: Float, cellWidth: Float, cellMargin: Float) {
         columnNumberRect.set(
-            cellMargin, cellHeight - cellWidth, cellWidth + cellMargin, cellHeight
+            cellMargin,
+            cellHeight - cellWidth,
+            cellWidth + cellMargin,
+            cellHeight
         )
     }
 

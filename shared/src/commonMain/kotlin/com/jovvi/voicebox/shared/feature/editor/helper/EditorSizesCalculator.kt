@@ -1,5 +1,7 @@
 package com.jovvi.voicebox.shared.feature.editor.helper
 
+import com.jovvi.voicebox.shared.business.editor.model.Loop
+import com.jovvi.voicebox.shared.feature.editor.EditorHelpers
 import com.jovvi.voicebox.shared.feature.editor.EditorSettings
 import com.jovvi.voicebox.shared.feature.editor.EditorSettings.FIELD_CELLS_COUNT
 import com.jovvi.voicebox.shared.feature.editor.EditorSettings.PALETTE_CELLS_COUNT
@@ -10,12 +12,16 @@ class EditorSizesCalculator(private val sizeProvider: EditorComponentsSizeProvid
 
     companion object {
 
-        const val UNDEFINED_SIZE = -1F
+        const val UNDEFINED_SIZE = -999F
 
         private const val CELL_W_RATIO = 12F
         private const val CELL_H_RATIO = 25F
         private const val CELL_MARGINS_COUNT = FIELD_CELLS_COUNT - 1
     }
+
+    private val preComputedLoopWidths: MutableMap<Loop.Size, Float> = mutableMapOf()
+    private val paletteMarginsHeight: Float
+        get() = 2 * (paletteInnerVerticalMargin + paletteOuterVerticalMargin)
 
     var cellHeight: Float = UNDEFINED_SIZE
         private set
@@ -67,8 +73,15 @@ class EditorSizesCalculator(private val sizeProvider: EditorComponentsSizeProvid
     val zoomedPaletteBorderWidth: Float
         get() = sizeProvider.zoomedPaletteBorderWidth.roundToInt().toFloat()
 
-    private val paletteMarginsHeight: Float
-        get() = 2 * (paletteInnerVerticalMargin + paletteOuterVerticalMargin)
+    fun ensureInitialized() {
+        check(cellHeight != UNDEFINED_SIZE) {
+            "EditorSizesCalculator.calculate() must be used before the following usage"
+        }
+    }
+
+    fun getLoopWidth(loopSize: Loop.Size): Float {
+        return preComputedLoopWidths.getValue(loopSize)
+    }
 
     fun calculate(totalHeight: Int) {
         val reservedContentHeight = calculateFixedContentHeight()
@@ -76,6 +89,20 @@ class EditorSizesCalculator(private val sizeProvider: EditorComponentsSizeProvid
         val onlyCellsHeight = totalHeight - (reservedContentHeight + cellMarginsHeight)
 
         cellHeight = (onlyCellsHeight / EditorSettings.TOTAL_CELLS_COUNT).roundToInt().toFloat()
+
+        preComputeLoopWidths(cellWidth, cellMargin)
+    }
+
+    private fun preComputeLoopWidths(cellWidth: Float, cellMargin: Float) {
+        preComputedLoopWidths.clear()
+        preComputedLoopWidths.put(
+            Loop.Size.TWO,
+            EditorHelpers.getLoopWidth(cellWidth, cellMargin, Loop.Size.TWO)
+        )
+        preComputedLoopWidths.put(
+            Loop.Size.FOUR,
+            EditorHelpers.getLoopWidth(cellWidth, cellMargin, Loop.Size.FOUR)
+        )
     }
 
     private fun calculateFixedContentHeight(): Float {

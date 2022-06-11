@@ -24,6 +24,8 @@ class EditorStateController(
     val draggingYPos: Float get() = state.draggingLoopYPos
 
     fun initialize(width: Float, height: Float) {
+        sizeCalculator.ensureInitialized()
+
         totalWidth = width
         totalHeight = height
         fieldTotalWidth = sizeCalculator.totalFieldWidth
@@ -34,9 +36,9 @@ class EditorStateController(
     }
 
     fun startDragging(tapXPos: Float, tapYPos: Float, loop: Loop) {
-        val cellMargin = sizeCalculator.cellMargin
+        val loopWidth = sizeCalculator.getLoopWidth(loop.size)
 
-        state.updateDraggingLoop(loop, fieldCellWidth, cellMargin)
+        state.updateDraggingLoop(loop, loopWidth)
         initDraggingCoordinates(tapXPos, tapYPos)
     }
 

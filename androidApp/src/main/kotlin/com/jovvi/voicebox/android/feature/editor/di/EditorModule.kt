@@ -2,7 +2,6 @@ package com.jovvi.voicebox.android.feature.editor.di
 
 import com.jovvi.voicebox.android.feature.editor.ui.widget.field.LoopShadersStorage
 import com.jovvi.voicebox.shared.business.editor.helper.LoopColorStorage
-import com.jovvi.voicebox.shared.common.AndroidSimpleLogger
 import com.jovvi.voicebox.shared.common.ext.lazyUnsafe
 import com.jovvi.voicebox.shared.feature.editor.AndroidEditComponentsSizeProvider
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorComponentsSizeProvider
@@ -39,7 +38,7 @@ interface EditorModule {
                 }
 
                 override val loopShadersStorage: LoopShadersStorage by lazyUnsafe {
-                    LoopShadersStorage(LoopColorStorage)
+                    LoopShadersStorage(LoopColorStorage, sizesCalculator)
                 }
 
                 override val editorSharedStateHolder: SharedStateHolder by lazyUnsafe {
@@ -47,10 +46,10 @@ interface EditorModule {
                 }
 
                 override val fieldStateController: FieldStateController
-                    get() = FieldStateController(editorSharedStateHolder, AndroidSimpleLogger)
+                    get() = FieldStateController(editorSharedStateHolder, sizesCalculator)
 
                 override val paletteStateController: PaletteStateController
-                    get() = PaletteStateController(sizesCalculator, AndroidSimpleLogger)
+                    get() = PaletteStateController(sizesCalculator)
 
                 override val editorStateController: EditorStateController
                     get() = EditorStateController(sizesCalculator, editorSharedStateHolder)

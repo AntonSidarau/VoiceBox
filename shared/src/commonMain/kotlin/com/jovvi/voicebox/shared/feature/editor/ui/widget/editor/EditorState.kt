@@ -1,7 +1,6 @@
 package com.jovvi.voicebox.shared.feature.editor.ui.widget.editor
 
 import com.jovvi.voicebox.shared.business.editor.model.Loop
-import com.jovvi.voicebox.shared.feature.editor.EditorHelpers
 
 class EditorState(
     var draggingLoopXPos: Float,
@@ -13,12 +12,13 @@ class EditorState(
     var loopWidth: Float = 0F
         private set
 
-    fun updateDraggingLoop(loop: Loop, fieldCellWidth: Float, cellMargin: Float) {
-        draggingLoop = loop
-        loopWidth = EditorHelpers.getLoopWidth(fieldCellWidth, cellMargin, loop.size)
+    fun updateDraggingLoop(loop: Loop, loopWidth: Float) {
+        this.draggingLoop = loop
+        this.loopWidth = loopWidth
     }
 
     fun removeDraggingLoop() {
         draggingLoop = null
+        loopWidth = 0F
     }
 }
