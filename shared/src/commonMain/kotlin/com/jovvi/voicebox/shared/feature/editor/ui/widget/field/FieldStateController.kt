@@ -74,4 +74,8 @@ class FieldStateController(
 
         loopsController.addDraggedLoop(rowNumber, columnNumber, loop, loopWidth, isOutFromVisibleBounds)
     }
+
+    fun clearLoops() {
+        loopsController.clear()
+    }
 }

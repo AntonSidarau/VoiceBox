@@ -118,6 +118,11 @@ class EditorFieldView @JvmOverloads constructor(
         invalidate()
     }
 
+    fun clearLoops() {
+        stateController.clearLoops()
+        invalidate()
+    }
+
     private fun drawColumns(canvas: Canvas) {
         val columns = stateController.columns
         for (column in columns) {

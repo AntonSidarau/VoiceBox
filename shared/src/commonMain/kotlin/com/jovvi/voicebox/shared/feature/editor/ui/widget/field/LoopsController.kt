@@ -40,6 +40,10 @@ class LoopsController(sizesCalculator: EditorSizesCalculator) {
         }
     }
 
+    fun clear() {
+        loopStorage.clear()
+    }
+
     private fun addDraggedLoopInternal(
         rowNumber: Int,
         columnNumber: Int,

@@ -11,6 +11,7 @@ import com.jovvi.voicebox.android.feature.editor.ui.widget.field.EditorFieldView
 import com.jovvi.voicebox.android.feature.editor.ui.widget.field.LoopDrawer
 import com.jovvi.voicebox.android.feature.editor.ui.widget.field.LoopShadersStorage
 import com.jovvi.voicebox.android.feature.editor.ui.widget.palette.EditorPaletteView
+import com.jovvi.voicebox.android.feature.editor.ui.widget.title.EditorTitleView
 import com.jovvi.voicebox.shared.business.editor.model.Loop
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.editor.EditorStateController
@@ -35,6 +36,7 @@ class EditorLayout @JvmOverloads constructor(
 
     val fieldView: EditorFieldView
     val paletteView: EditorPaletteView
+    val titleBar: EditorTitleView
 
     init {
         val component: EditorComponent = Injector.getComponent(EditorComponent::class.java)
@@ -44,8 +46,11 @@ class EditorLayout @JvmOverloads constructor(
 
         setWillNotDraw(false)
 
-        val titleBar = View(context).apply { layoutParams = createDefaultChildLayoutParams() }
         fieldView = EditorFieldView(context).apply { layoutParams = createDefaultChildLayoutParams() }
+        titleBar = EditorTitleView(context).apply {
+            layoutParams = createDefaultChildLayoutParams()
+            onDeleteAllListener = { fieldView.clearLoops() }
+        }
         val controlsBar = View(context).apply { layoutParams = createDefaultChildLayoutParams() }
         paletteView = EditorPaletteView(context).apply { layoutParams = createDefaultChildLayoutParams() }
 
@@ -131,6 +136,7 @@ class EditorLayout @JvmOverloads constructor(
 
     fun clearListeners() {
         paletteView.clearListeners()
+        titleBar.clearListeners()
     }
 
     private fun createDefaultChildLayoutParams(): LayoutParams {
