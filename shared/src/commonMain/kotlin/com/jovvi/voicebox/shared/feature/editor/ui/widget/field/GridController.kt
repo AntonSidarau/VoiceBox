@@ -105,7 +105,7 @@ internal class GridController(
         }
     }
 
-    fun calculateColumnIndex(xPos: Float): Int {
+    fun calculateColumnIndexWithRounding(xPos: Float): Int {
         val columns = state.columns
         val columnsCount = columns.size
         var index = -1
@@ -123,6 +123,23 @@ internal class GridController(
 
         return index
     }
+
+    fun calculateColumnIndexPrecise(xPos: Float, columns: Array<FieldColumn>): Int {
+        val columnsCount = columns.size
+        var index = -1
+        for (i in 0 until columnsCount) {
+            val j = if (i + 1 >= columnsCount) 0 else i + 1
+            val current = columns[i].position
+            val next = columns[j].position
+            if (xPos in current..next) {
+                index = i
+                break
+            }
+        }
+
+        return index
+    }
+
 
     fun calculateRowIndexWithRounding(yPos: Float): Int {
         val possibleRow = ((yPos - cellHeight) / (cellHeight + cellMargin)).roundToInt()

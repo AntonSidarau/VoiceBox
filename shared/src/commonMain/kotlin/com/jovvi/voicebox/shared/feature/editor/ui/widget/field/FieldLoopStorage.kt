@@ -11,13 +11,17 @@ class FieldLoopStorage(
 
     private val store: MutableMap<Int, FieldLoop> = hashMapOf()
     private val keyStore: MutableList<Int> = mutableListOf()
+    private val keyBalancer: HashMap<Int, Int> = hashMapOf()
 
-    private var extractedLoop: Pair<Int, FieldLoop>? = null
+    private var takenLoop: Pair<Int, FieldLoop>? = null
 
-    val extractedFieldLoop: FieldLoop? get() = extractedLoop?.second
+    var onLoopAdded: ((row: Int, column: Int, model: Loop) -> Unit)? = null
+    var onLoopRemoved: ((row: Int, column: Int) -> Unit)? = null
+    var onAllLoopsRemoved: (() -> Unit)? = null
+    var onLoopsCountUpdated: ((Int) -> Unit)? = null
 
+    val takenFieldLoop: FieldLoop? get() = takenLoop?.second
     val lastLoop: FieldLoop? get() = keyStore.lastOrNull()?.let { store[it] }
-
     val availableLoops: Collection<FieldLoop> get() = store.values
 
     fun put(rowNumber: Int, columnNumber: Int, loop: Loop, loopWidth: Float) {
@@ -25,7 +29,7 @@ class FieldLoopStorage(
             columnNumber < 0 ||
             columnNumber > EditorSettings.TIMELINE_LENGTH_COLUMNS
         ) {
-            tryRestoreExtractedLoop()
+            tryReturnTakenLoop()
             return
         }
 
@@ -42,17 +46,24 @@ class FieldLoopStorage(
             rowNumber
         )
 
-        extractedLoop = null
-        addLoopToStorage(fieldLoop, key)
+        takenLoop = null
+        addLoopToStorage(fieldLoop, key, rowNumber, columnNumber)
+
+        onLoopAdded?.invoke(rowNumber, columnNumber, loop)
+        onLoopsCountUpdated?.invoke(store.size)
     }
 
-    fun remove(key: Int) {
-        extractedLoop = null
-        removeLoopFromStorage(key)
+    fun remove(rowNumber: Int, columnNumber: Int) {
+        takenLoop = null
+        val key = calculateKey(rowNumber, columnNumber)
+        removeLoopFromStorage(key, rowNumber, columnNumber)
+
+        onLoopRemoved?.invoke(rowNumber, columnNumber)
+        onLoopsCountUpdated?.invoke(store.size)
     }
 
-    fun getLoopByKey(key: Int): FieldLoop? {
-        return store[key]
+    fun getLoopBy(rowNumber: Int, columnNumber: Int): FieldLoop? {
+        return store[calculateKey(rowNumber, columnNumber)]
     }
 
     fun isAllowedToPutLoop(rowNumber: Int, columnNumber: Int, loopSize: Loop.Size): Boolean {
@@ -74,23 +85,52 @@ class FieldLoopStorage(
         return result
     }
 
-    fun tryRestoreExtractedLoop() {
-        val item = extractedLoop
+    fun take(rowNumber: Int, columnNumber: Int): FieldLoop? {
+        val key = calculateKey(rowNumber, columnNumber)
+        val loopKey = keyBalancer[key]
+        return loopKey?.let { takeLoopInternal(loopKey) }
+    }
+
+    fun tryReturnTakenLoop() {
+        val item = takenLoop
         if (item != null) {
             val key = item.first
-            addLoopToStorage(item.second, key)
+            addLoopToStorage(item.second, key, item.second.rowNumber, item.second.columnNumber)
+
+            with(item.second) {
+                onLoopAdded?.invoke(rowNumber, columnNumber, model)
+                onLoopsCountUpdated?.invoke(store.size)
+            }
         }
     }
 
     fun clear() {
         store.clear()
         keyStore.clear()
-        extractedLoop = null
+        keyBalancer.clear()
+        takenLoop = null
+
+        onAllLoopsRemoved?.invoke()
+        onLoopsCountUpdated?.invoke(store.size)
     }
 
-    fun calculateKey(rowNumber: Int, columnNumber: Int): Int {
+    private fun calculateKey(rowNumber: Int, columnNumber: Int): Int {
         val keyBase = columnNumber * EditorSettings.FIELD_CONTENT_CELLS_COUNT
         return keyBase + rowNumber
+    }
+
+    private fun takeLoopInternal(key: Int): FieldLoop? {
+        val loop = store[key]
+        if (loop != null) {
+            takenLoop = key to loop
+            val rowNumber = loop.rowNumber
+            val columnNumber = loop.columnNumber
+            removeLoopFromStorage(key, rowNumber, columnNumber)
+
+            onLoopRemoved?.invoke(rowNumber, columnNumber)
+        }
+
+        return loop
     }
 
     private fun calculateVirtualXPos(
@@ -109,14 +149,25 @@ class FieldLoopStorage(
         return (keyOffset + 1) * (cellHeight + cellMargin)
     }
 
-    private fun addLoopToStorage(loop: FieldLoop, key: Int) {
+    private fun addLoopToStorage(loop: FieldLoop, key: Int, rowNumber: Int, columnNumber: Int) {
         store[key] = loop
         addKeyToStore(key)
+
+        repeat(loop.model.size.value) {
+            val balancerKey = calculateKey(rowNumber, columnNumber + it)
+            keyBalancer[balancerKey] = key
+        }
     }
 
-    private fun removeLoopFromStorage(key: Int) {
-        store.remove(key)
+    private fun removeLoopFromStorage(key: Int, rowNumber: Int, columnNumber: Int) {
+        val loop = store.remove(key)
         keyStore.remove(key)
+
+        if (loop == null) return
+        repeat(loop.model.size.value) {
+            val balancerKey = calculateKey(rowNumber, columnNumber + it)
+            keyBalancer.remove(balancerKey)
+        }
     }
 
     private fun addKeyToStore(key: Int) {

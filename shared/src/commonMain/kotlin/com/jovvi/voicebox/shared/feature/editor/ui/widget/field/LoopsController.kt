@@ -28,16 +28,19 @@ class LoopsController(sizesCalculator: EditorSizesCalculator) {
         if (isInBounds) {
             val numberToPut = if (isOutFromVisibleBounds) columnNumber - loop.size.value else columnNumber
 
-            val key = loopStorage.calculateKey(rowNumber, numberToPut)
-            val hasCandidateToReplace = loopStorage.getLoopByKey(key)
+            val hasCandidateToReplace = loopStorage.getLoopBy(rowNumber, numberToPut)
             if (hasCandidateToReplace != null) {
-                loopStorage.remove(key)
+                loopStorage.remove(rowNumber, numberToPut)
             }
 
             addDraggedLoopInternal(rowNumber, numberToPut, loop, loopWidth)
         } else {
-            loopStorage.tryRestoreExtractedLoop()
+            loopStorage.tryReturnTakenLoop()
         }
+    }
+
+    fun take(rowNumber: Int, columnNumber: Int): FieldLoop? {
+        return loopStorage.take(rowNumber, columnNumber)
     }
 
     fun clear() {
@@ -55,7 +58,7 @@ class LoopsController(sizesCalculator: EditorSizesCalculator) {
         ) {
             loopStorage.put(rowNumber, columnNumber, loop, loopWidth)
         } else {
-            loopStorage.tryRestoreExtractedLoop()
+            loopStorage.tryReturnTakenLoop()
         }
     }
 }

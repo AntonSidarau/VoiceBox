@@ -7,6 +7,7 @@ import com.jovvi.voicebox.shared.feature.editor.AndroidEditComponentsSizeProvide
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorComponentsSizeProvider
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
 import com.jovvi.voicebox.shared.feature.editor.helper.SharedStateHolder
+import com.jovvi.voicebox.shared.feature.editor.ui.widget.editor.EditorDragController
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.editor.EditorStateController
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.field.FieldStateController
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.palette.PaletteStateController
@@ -20,6 +21,8 @@ interface EditorModule {
     val paletteStateController: PaletteStateController
 
     val editorStateController: EditorStateController
+
+    val editorDragController: EditorDragController
 
     val editorSharedStateHolder: SharedStateHolder
 
@@ -53,6 +56,9 @@ interface EditorModule {
 
                 override val editorStateController: EditorStateController
                     get() = EditorStateController(sizesCalculator, editorSharedStateHolder)
+
+                override val editorDragController: EditorDragController
+                    get() = EditorDragController()
             }
         }
     }

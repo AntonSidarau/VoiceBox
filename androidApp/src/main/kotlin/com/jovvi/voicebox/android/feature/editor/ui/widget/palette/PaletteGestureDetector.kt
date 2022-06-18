@@ -2,14 +2,14 @@ package com.jovvi.voicebox.android.feature.editor.ui.widget.palette
 
 import android.view.GestureDetector
 import android.view.MotionEvent
+import com.jovvi.voicebox.shared.feature.editor.ui.widget.editor.EditorDragController
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.palette.PaletteStateController
 
 class PaletteGestureDetector(
     private val stateController: PaletteStateController,
+    private val dragController: EditorDragController,
     private val requestInvalidate: () -> Unit,
 ) : GestureDetector.SimpleOnGestureListener() {
-
-    private var isLoopDragging: Boolean = false
 
     // TODO if finger will be idle for a few seconds - scroll doesn't tracked
     override fun onScroll(
@@ -26,8 +26,8 @@ class PaletteGestureDetector(
                 requestInvalidate()
                 true
             }
-            isLoopDragging -> {
-                stateController.handleLoopDragging(distanceX, distanceY)
+            dragController.isLoopDragging -> {
+                dragController.updateDragging(distanceX, distanceY)
                 true
             }
             else -> false
@@ -39,17 +39,15 @@ class PaletteGestureDetector(
 
         return if (e.y >= stateController.zoomedPaletteOffset) {
             handleTapOnZoomedArea(e)
-            isLoopDragging = false
             true
         } else {
             handleTapOnLoopsArea(e)
-            isLoopDragging = true
             true
         }
     }
 
     fun cancelLoopDragging() {
-        isLoopDragging = false
+        dragController.endDragging()
     }
 
     private fun handleTapOnZoomedArea(e: MotionEvent) {
@@ -58,6 +56,8 @@ class PaletteGestureDetector(
     }
 
     private fun handleTapOnLoopsArea(e: MotionEvent) {
-        stateController.handleLoopTouch(e.x, e.y)
+        stateController.handleLoopTouch(e.x, e.y) { xPos, yPos, loop ->
+            dragController.startDragging(xPos, yPos, loop)
+        }
     }
 }

@@ -19,6 +19,8 @@ import com.jovvi.voicebox.shared.business.editor.model.Loop
 import com.jovvi.voicebox.shared.common.ui.ext.dpToPx
 import com.jovvi.voicebox.shared.common.ui.ext.getThemeColor
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
+import com.jovvi.voicebox.shared.feature.editor.ui.widget.editor.EditorDragController
+import com.jovvi.voicebox.shared.feature.editor.ui.widget.editor.LoopDraggingConnector
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.palette.PaletteStateController
 
 private const val ZOOM_BORDER_WIDTH_DP = 2F
@@ -26,8 +28,12 @@ private const val ZOOM_BORDER_WIDTH_DP = 2F
 class EditorPaletteView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : View(context, attrs, defStyleAttr) {
+    defStyleAttr: Int = 0,
+    private val dragController: EditorDragController = Injector
+        .getComponent<EditorComponent>(EditorComponent::class.java)
+        .editorDragController
+) : View(context, attrs, defStyleAttr),
+    LoopDraggingConnector by LoopDraggingConnector.default(dragController) {
 
     private val stateController: PaletteStateController
     private val sizesCalculator: EditorSizesCalculator
@@ -41,7 +47,9 @@ class EditorPaletteView @JvmOverloads constructor(
     }
 
     private val paletteGesturesListener = PaletteGestureDetector(
-        stateController, requestInvalidate = { invalidate() }
+        stateController = stateController,
+        dragController = dragController,
+        requestInvalidate = { invalidate() }
     )
     private val gestureDetector: GestureDetectorCompat = GestureDetectorCompat(
         context, paletteGesturesListener
@@ -84,7 +92,6 @@ class EditorPaletteView @JvmOverloads constructor(
 
         if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
             paletteGesturesListener.cancelLoopDragging()
-            stateController.handleLoopTouchEnded()
         }
 
         return if (gestureDetector.onTouchEvent(event)) {
@@ -104,24 +111,6 @@ class EditorPaletteView @JvmOverloads constructor(
         stateController.prePopulate(loops)
         drawZoomedPaletteContent()
         invalidate()
-    }
-
-    fun setOnStartDraggingLoopListener(block: ((xPos: Float, yPos: Float, loop: Loop) -> Unit)?) {
-        stateController.setOnStartDraggingLoopListener(block)
-    }
-
-    fun setOnEndDraggingLoopListener(block: (() -> Unit)?) {
-        stateController.setOnEndDraggingLoopListener(block)
-    }
-
-    fun setOnDraggingLoopListener(block: ((distanceX: Float, distanceY: Float) -> Unit)?) {
-        stateController.setOnEndDraggingLoopListener(block)
-    }
-
-    fun clearListeners() {
-        setOnStartDraggingLoopListener(null)
-        setOnEndDraggingLoopListener(null)
-        setOnDraggingLoopListener(null)
     }
 
     private fun drawPaletteLoops(canvas: Canvas) {

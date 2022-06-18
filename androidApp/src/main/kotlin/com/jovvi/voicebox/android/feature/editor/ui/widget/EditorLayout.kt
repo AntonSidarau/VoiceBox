@@ -109,8 +109,13 @@ class EditorLayout @JvmOverloads constructor(
         }
     }
 
-    fun startDragging(xPos: Float, yPos: Float, loop: Loop) {
+    fun startDraggingFromPalette(xPos: Float, yPos: Float, loop: Loop) {
         stateController.startDragging(xPos, yPos + paletteView.y, loop)
+        invalidate()
+    }
+
+    fun startDraggingFromField(xPos: Float, yPos: Float, loop: Loop) {
+        stateController.startDragging(xPos, yPos + fieldView.y, loop)
         invalidate()
     }
 
@@ -137,6 +142,7 @@ class EditorLayout @JvmOverloads constructor(
     fun clearListeners() {
         paletteView.clearListeners()
         titleBar.clearListeners()
+        fieldView.clearListeners()
     }
 
     private fun createDefaultChildLayoutParams(): LayoutParams {

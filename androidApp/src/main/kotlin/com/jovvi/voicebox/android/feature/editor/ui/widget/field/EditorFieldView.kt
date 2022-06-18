@@ -17,6 +17,8 @@ import com.jovvi.voicebox.shared.common.ui.ext.getThemeColor
 import com.jovvi.voicebox.shared.common.ui.ext.spToPx
 import com.jovvi.voicebox.shared.feature.editor.EditorSettings
 import com.jovvi.voicebox.shared.feature.editor.helper.EditorSizesCalculator
+import com.jovvi.voicebox.shared.feature.editor.ui.widget.editor.EditorDragController
+import com.jovvi.voicebox.shared.feature.editor.ui.widget.editor.LoopDraggingConnector
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.field.FieldColumn
 import com.jovvi.voicebox.shared.feature.editor.ui.widget.field.FieldStateController
 
@@ -26,8 +28,12 @@ private const val DOT_RADIUS_DP = 3F
 class EditorFieldView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
-) : View(context, attrs, defStyleAttr) {
+    defStyleAttr: Int = 0,
+    private val dragController: EditorDragController = Injector
+        .getComponent<EditorComponent>(EditorComponent::class.java)
+        .editorDragController
+) : View(context, attrs, defStyleAttr),
+    LoopDraggingConnector by LoopDraggingConnector.default(dragController) {
 
     private val stateController: FieldStateController
     private val sizesCalculator: EditorSizesCalculator
@@ -67,13 +73,15 @@ class EditorFieldView @JvmOverloads constructor(
     private val blendedColumnCellPath: Path = Path()
     private val columnNumberRect: RectF = RectF()
 
+    private val fieldGestureDetector = FieldGestureDetector(
+        context = context,
+        stateController = stateController,
+        dragController = dragController,
+        requestInvalidate = { invalidate() },
+        requestInvalidateOnAnimation = { postInvalidateOnAnimation() }
+    )
     private val gestureDetector: GestureDetectorCompat = GestureDetectorCompat(
-        context, FieldGestureDetector(
-            context = context,
-            stateController = stateController,
-            requestInvalidate = { invalidate() },
-            requestInvalidateOnAnimation = { postInvalidateOnAnimation() }
-        )
+        context, fieldGestureDetector
     )
 
     private lateinit var cellShadersStorage: CellShadersStorage
@@ -100,6 +108,10 @@ class EditorFieldView @JvmOverloads constructor(
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         event ?: return super.onTouchEvent(event)
+
+        if (event.action == MotionEvent.ACTION_UP || event.action == MotionEvent.ACTION_CANCEL) {
+            fieldGestureDetector.cancelLoopDragging()
+        }
 
         return if (gestureDetector.onTouchEvent(event)) {
             true

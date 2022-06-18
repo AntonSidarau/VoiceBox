@@ -45,13 +45,28 @@ class EditorFragment : BaseFragment(R.layout.fragment_editor), ComponentContaine
 
     private fun bindViewActions(editorLayout: EditorLayout) {
         with(editorLayout) {
-            paletteView.setOnStartDraggingLoopListener { xPos, yPos, loop ->
-                editorLayout.startDragging(xPos, yPos, loop)
-            }
-            paletteView.setOnEndDraggingLoopListener { editorLayout.stopDragging() }
-            paletteView.setOnDraggingLoopListener { distanceX, distanceY ->
-                editorLayout.updateDraggingLoopPositions(distanceX, distanceY)
-            }
+            bindPaletteActions()
+            bindFieldActions()
+        }
+    }
+
+    private fun EditorLayout.bindPaletteActions() {
+        paletteView.setOnStartDraggingLoopListener { xPos, yPos, loop ->
+            editorLayout.startDraggingFromPalette(xPos, yPos, loop)
+        }
+        paletteView.setOnEndDraggingLoopListener { editorLayout.stopDragging() }
+        paletteView.setOnDraggingLoopListener { distanceX, distanceY ->
+            editorLayout.updateDraggingLoopPositions(distanceX, distanceY)
+        }
+    }
+
+    private fun EditorLayout.bindFieldActions() {
+        fieldView.setOnStartDraggingLoopListener { xPos, yPos, loop ->
+            editorLayout.startDraggingFromField(xPos, yPos, loop)
+        }
+        fieldView.setOnEndDraggingLoopListener { editorLayout.stopDragging() }
+        fieldView.setOnDraggingLoopListener { distanceX, distanceY ->
+            editorLayout.updateDraggingLoopPositions(distanceX, distanceY)
         }
     }
 }

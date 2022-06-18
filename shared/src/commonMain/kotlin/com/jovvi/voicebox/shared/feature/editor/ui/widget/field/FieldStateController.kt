@@ -15,15 +15,15 @@ class FieldStateController(
     private lateinit var gridController: GridController
     private lateinit var loopsController: LoopsController
 
+    private var cellMargin: Float = 0F
+    private var cellWidth: Float = 0F
+
     var fieldHeight: Float = 0F
         private set
     var cellHeight: Float = 0F
         private set
     var bottomNotContentCellPosition = 0F
         private set
-
-    private var cellMargin: Float = 0F
-    private var cellWidth: Float = 0F
 
     val columns: Array<FieldColumn> get() = gridController.columns
     val loops: Collection<FieldLoop> get() = loopsController.loops
@@ -52,6 +52,10 @@ class FieldStateController(
         return velocity / maxFlingVelocity * PIXELS_PER_SECOND
     }
 
+    fun isInContentBounds(yPos: Float): Boolean {
+        return yPos in cellHeight..fieldHeight - cellHeight
+    }
+
     fun addDraggedLoop(xPos: Float, yPos: Float, loop: Loop) {
         val virtualStartPos = gridController.virtualStartPos
         val isOutFromVisibleBounds = xPos < 0
@@ -64,7 +68,7 @@ class FieldStateController(
             else -> xPos
         }
 
-        val columnIndex = gridController.calculateColumnIndex(xPosInternal)
+        val columnIndex = gridController.calculateColumnIndexWithRounding(xPosInternal)
         val rowIndex = gridController.calculateRowIndexWithRounding(yPos)
 
         val columnNumber = if (columnIndex == -1) -1 else columns[columnIndex].number
@@ -73,6 +77,18 @@ class FieldStateController(
         val rowNumber = if (rowIndex <= illegalTopRowIndex || rowIndex >= illegalBottomRowIndex) -1 else rowIndex
 
         loopsController.addDraggedLoop(rowNumber, columnNumber, loop, loopWidth, isOutFromVisibleBounds)
+    }
+
+    fun takeLoopFromField(xPos: Float, yPos: Float): FieldLoop? {
+        val columnIndex = gridController.calculateColumnIndexPrecise(xPos, columns)
+        val rowNumber = gridController.calculateRowIndexPrecise(yPos)
+
+        return if (columnIndex != -1 && rowNumber != -1) {
+            val columnNumber = columns[columnIndex].number
+            loopsController.take(rowNumber, columnNumber)
+        } else {
+            null
+        }
     }
 
     fun clearLoops() {
